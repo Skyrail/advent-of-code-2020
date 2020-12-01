@@ -2,17 +2,18 @@ import os, sys
 from itertools import combinations
 from functools import reduce
 
-if len(sys.argv) != 2:
-    raise ValueError('Please supply the intcode to be processed')
-
-inputPath = sys.argv[1]
-
 def findExpensesThatEqual(expenses, result, count):
+    """ Takes a list of expenses, figures out which number of expenses (denoted by count) add up to equal result """
     combos = combinations(expenses, count)
 
     for combo in combos:
         if sum(combo) == result:
             return combo
+
+if len(sys.argv) != 2:
+    raise ValueError('Please supply the input to be processed')
+
+inputPath = sys.argv[1]
 
 if os.path.isfile(inputPath):
     try:
