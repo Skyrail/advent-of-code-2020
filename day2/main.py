@@ -13,13 +13,11 @@ if os.path.isfile(inputPath):
         passwordPolicyList, validCount = list(file.read().strip().split('\n')), 0
 
         for policy in passwordPolicyList:
-            charCount, character, password = [val.strip(':') for val in policy.split()]
+            charPositions, character, password = [val.strip(':') for val in policy.split()]
 
-            minCount,maxCount = [int(val) for val in charCount.split('-')]
+            positionA,positionB = [int(val) - 1 for val in charPositions.split('-')]
 
-            actualCount = password.count(character)
-
-            validCount += 1 if minCount <= actualCount <= maxCount else 0
+            validCount += 1 if (password[positionA] == character) is not (password[positionB] == character) else 0
 
         print(f'The valid password count is {validCount}')
 
