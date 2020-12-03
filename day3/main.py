@@ -11,14 +11,21 @@ if os.path.isfile(inputPath):
         file = open(inputPath)
         
         hillMap = list(file.read().strip().split('\n'))
-        position, right = 1, 3
-        mapWidth, treeCount = len(hillMap[0]), 0
+        mapWidth, treeMultiplyValue = len(hillMap[0]), 1
 
-        for line in hillMap[1:]:
-            position += right if position < (mapWidth - (right - 1)) else -(mapWidth - right)
-            treeCount += 1 if line[position - 1] == '#' else 0
+        testMovements = [[1,1],[3,1],[5,1],[7,1],[1,2]]
 
-        print(f'Tree count: {treeCount}')
+        for movements in testMovements:
+            x, y, right, down, treeCount = 1, 0, movements[0], movements[1], 0
+
+            while y < len(hillMap[1:]):
+                x += right if x < (mapWidth - (right - 1)) else -(mapWidth - right)
+                y += down
+                treeCount += 1 if hillMap[y][x - 1] == '#' else 0
+
+            treeMultiplyValue *= treeCount
+
+        print(f'Tree multiply value: {treeMultiplyValue}')
 
     except IOError:
         print(f'Unable to open file {inputPath}')
