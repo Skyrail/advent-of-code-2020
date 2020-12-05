@@ -2,25 +2,24 @@ import os, sys
 from math import ceil
 
 def parseSeatFromPass(boardingPass):
-    rowCode,columnCode,row,column = boardingPass[:-3], boardingPass[-3:], [0,127], [0,7]
 
-    for r in rowCode:
-        if r == 'F':
-            row = [row[0],row[1] - ceil((row[1]-row[0])/2)]
-        elif r == 'B':
-            row = [row[0] + ceil((row[1]-row[0])/2), row[1]]
-    else:
-        row = row[0] if r == 'F' else row[1]
+    boardingPass = boardingPass.replace('F', '0').replace('B','1').replace('L','0').replace('R', '1')
 
-    for c in columnCode:
-        if c == 'L':
-            column = [column[0],column[1] - ceil((column[1]-column[0])/2)]
-        elif c == 'R':
-            column = [column[0] + ceil((column[1]-column[0])/2), column[1]]
-    else:
-        column = column[0] if c == 'L' else column[1]
+    rowCode,columnCode = boardingPass[:-3], boardingPass[-3:]
+
+    row,column = int(rowCode, 2), int(columnCode, 2)
 
     return row,column
+
+def calculateSeatId(row,column):
+    return row*8 + column
+
+def getAvailableSeatId(seatIds):
+    possibleIds = set(range(min(seatIds),max(seatIds)))
+    availableIds = list(possibleIds.difference(seatIds))
+
+    return availableIds[0]
+
 
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
@@ -35,9 +34,12 @@ if os.path.isfile(inputPath):
 
         seats = [parseSeatFromPass(boardingPass) for boardingPass in batch]
 
-        maximumSeatId = max(list(map(lambda seat: seat[0]*8+seat[1], seats)))
-        
-        print(f'Maximum seat ID is {maximumSeatId}')
+        seatIds = [calculateSeatId(row,column) for row,column in seats]
+
+        availableId = getAvailableSeatId(seatIds)
+
+        print(f'Max seat ID is {max(seatIds)}')
+        print(f'Available seat ID is {availableId}')
 
     except IOError:
         print(f'Unable to open file {inputPath}')
