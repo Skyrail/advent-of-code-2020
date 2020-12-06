@@ -14,7 +14,8 @@ if os.path.isfile(inputPath):
         total = 0
 
         for group in batch:
-            total += len(set(group.replace('\n', '')))
+            answers = [set(results) for results in group.split()]
+            total += len(set.intersection(*answers))
 
         print(f'The total is {total}')
 
