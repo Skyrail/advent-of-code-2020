@@ -11,6 +11,17 @@ def get_parents(bags, child):
 
     return parents
 
+def get_children_count(bags, parent):
+
+    childrenCount = 0
+
+    for count,bag in bags[parent]:
+        childrenCount += int(count)
+        if bag in bags:
+            childrenCount += get_children_count(bags, bag) * int(count)
+
+    return childrenCount
+
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
 
@@ -22,7 +33,7 @@ if os.path.isfile(inputPath):
         
         batch = list(file.read().strip().split('\n'))
 
-        bags = {}
+        containedBags, containerBags, total= {}, {}, 0
         containerRegex = re.compile(r'^([\S]+\s[\S]+)')
         containsRegex = re.compile(r'([0-9]+)\s([\S]+\s[\S]+)')
 
@@ -30,13 +41,16 @@ if os.path.isfile(inputPath):
             containingBag = containerRegex.match(rule).group()
             containedInBag = containsRegex.findall(rule)
 
-            for count,bag in containedInBag:
-                if bag in bags:
-                    bags[bag].add(containingBag)
-                else:
-                    bags[bag] = set([containingBag])
+            containerBags[containingBag] = containedInBag
 
-        print(f"The shiny gold bag will go into the following bags: {len(get_parents(bags, 'shiny gold'))}")
+            for count,bag in containedInBag:
+                if bag in containedBags:
+                    containedBags[bag].add(containingBag)
+                else:
+                    containedBags[bag] = set([containingBag])
+
+        print(f"The shiny gold bag will go into the following bags: {len(get_parents(containedBags, 'shiny gold'))}")
+        print(f"The shiny gold bag will contain a total of {get_children_count(containerBags, 'shiny gold')} bags")
 
     except IOError:
         print(f'Unable to open file {inputPath}')
