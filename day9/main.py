@@ -1,4 +1,4 @@
-import os, sys, re
+import os, sys
 
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
@@ -11,6 +11,7 @@ if os.path.isfile(inputPath):
         
         batch = list(map(int,file.read().strip().split('\n')))
 
+        result = resultIndex = total = 0
         i = chunkSize = 25
 
         while i < len(batch):
@@ -21,10 +22,29 @@ if os.path.isfile(inputPath):
                 sums.add(current - previous)
             
             if len(sums & previousChunk) == 0:
-                print(f'The number {current} cannot be summed from the previous chunk {previousChunk}')
+                result, resultIndex = current, i
+                print(f'The number {result} cannot be summed from the previous chunk {previousChunk}')
                 break
             
             i += 1
+
+        print(f'The result was {result}')
+
+        startIndex = currentIndex = 0
+
+        listLength = len(batch[startIndex:resultIndex])
+        while currentIndex < listLength:
+            total += batch[currentIndex]
+
+            if total == result:
+                contiguousRange = batch[startIndex:currentIndex]
+                print(f'Sum of the smallest and largest numbers in contiguous range is {min(contiguousRange) + max(contiguousRange)}')
+                break
+            elif total > result:
+                startIndex += 1
+                currentIndex, total = startIndex, 0
+            else:
+                currentIndex += 1
 
     except IOError:
         print(f'Unable to open file {inputPath}')
