@@ -27,26 +27,21 @@ if os.path.isfile(inputPath):
 
             previousBatch = currentBatch.copy()
 
-            for rowNo,row in enumerate(previousBatch):
-                for colNo,column in enumerate(row):
-                    if column == 2:
-                        continue
-                    else:
-                        startRow = (rowNo - 1) if (rowNo - 1) >= 0 else 0
-                        endRow = rowNo + 2
+            iterator = np.nditer(previousBatch, flags=['multi_index'])
 
-                        startCol = (colNo - 1) if (colNo - 1) >= 0 else 0
-                        endCol = colNo + 2
+            for element in iterator:
+                row,col = iterator.multi_index
+                startRow,endRow = 0 if row == 0 else row - 1, row + 2
+                startCol,endCol = 0 if col == 0 else col - 1, col + 2
 
-                        subMatrix = previousBatch[startRow:endRow, startCol:endCol]
-                        previousValue = previousBatch[rowNo,colNo]
-                        
-                        if previousValue == 1 and np.count_nonzero(subMatrix == 1) > 4:
-                            currentBatch[rowNo,colNo] = 0
-                        elif previousValue == 0 and np.count_nonzero(subMatrix == 1) == 0:
-                            currentBatch[rowNo,colNo] = 1
-                        else:
-                            continue
+                subMatrix = previousBatch[startRow:endRow,startCol:endCol]
+
+                if element == 1 and np.count_nonzero(subMatrix == 1) > 4:
+                    currentBatch[row,col] = 0
+                elif element == 0 and np.count_nonzero(subMatrix == 1) == 0:
+                    currentBatch[row,col] = 1
+                else:
+                    continue
 
         print(f'The number of occupied seats is: {np.count_nonzero(currentBatch == 1)}')
 
