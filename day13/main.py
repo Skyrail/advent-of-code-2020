@@ -24,7 +24,7 @@ if os.path.isfile(inputPath):
             n = int(n)
             a = n - i
             y = N // n
-            z = pow(y, n-2, n)
+            z = pow(y, -1, n)
 
             sum += a * y * z
             sum %= N 
