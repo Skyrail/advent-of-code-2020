@@ -1,49 +1,62 @@
 import os, sys
-import numpy as np
+from copy import deepcopy
+import time
 
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
 
 inputPath = sys.argv[1]
 
-def replaceChars(string):
-    """ 0 == empty seat, 1 == occupied seat, 2 == floor """
-    stringList = list(string)
-
-    stringList[:]  = [(lambda x: 0 if x == 'L' else 2)(x) for x in stringList]
-
-    return stringList
-
 if os.path.isfile(inputPath):
     try:
         file = open(inputPath)
         
-        batch = file.read().strip().split('\n')
+        currentBatch = file.read().strip().split('\n')
+        currentBatch = [list(x) for x in currentBatch]
 
-        previousBatch = np.array([])
-        currentBatch = np.array([replaceChars(row) for row in batch])
+        maxRow = len(currentBatch)
+        maxCol = len(currentBatch[0])
 
-        while np.array_equal(previousBatch, currentBatch) != True:
+        while True:
 
-            previousBatch = currentBatch.copy()
+            hasChanged = False
+            previousBatch = deepcopy(currentBatch)
 
-            iterator = np.nditer(previousBatch, flags=['multi_index'])
+            for row in range(maxRow):
+                for col in range(maxCol): 
+                    element = previousBatch[row][col]
 
-            for element in iterator:
-                row,col = iterator.multi_index
-                startRow,endRow = 0 if row == 0 else row - 1, row + 2
-                startCol,endCol = 0 if col == 0 else col - 1, col + 2
+                    occupiedCount = 0
 
-                subMatrix = previousBatch[startRow:endRow,startCol:endCol]
+                    for ri in (-1, 0, 1):
+                        for ci in (-1, 0, 1):
 
-                if element == 1 and np.count_nonzero(subMatrix == 1) > 4:
-                    currentBatch[row,col] = 0
-                elif element == 0 and np.count_nonzero(subMatrix == 1) == 0:
-                    currentBatch[row,col] = 1
-                else:
-                    continue
+                            if (ri == 0 and ci == 0):
+                                continue
 
-        print(f'The number of occupied seats is: {np.count_nonzero(currentBatch == 1)}')
+                            rowIndex = row + ri
+                            colIndex = col + ci
+                                
+                            while (0 <= rowIndex < maxRow) and (0 <= colIndex < maxCol) and (previousBatch[rowIndex][colIndex] == '.'):
+                                rowIndex += ri
+                                colIndex += ci
+
+                            if (0 <= rowIndex < maxRow) and (0 <= colIndex < maxCol) and previousBatch[rowIndex][colIndex] == '#':
+                                occupiedCount += 1
+                                
+                    if element == '#' and occupiedCount >= 5:
+                        currentBatch[row][col] = 'L'
+                        hasChanged = True
+                    elif element == 'L' and occupiedCount == 0:
+                        currentBatch[row][col] = '#'
+                        hasChanged = True
+
+            if hasChanged == False:
+                break
+
+        finalString = ("".join(["".join(x) for x in currentBatch])).count('#')
+
+        print(f'The number of occupied seats is: {finalString}')
 
     except IOError:
         print(f'Unable to open file {inputPath}')
