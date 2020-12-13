@@ -1,4 +1,5 @@
 import os, sys
+from functools import reduce
 
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
@@ -11,25 +12,24 @@ if os.path.isfile(inputPath):
         
         currentBatch = file.read().strip().split('\n')
 
-        startTimestamp,busIds = currentBatch
+        busIds = currentBatch[1].split(',')
 
-        timestamp = startTimestamp = int(startTimestamp)
-        
-        busIds = [int(x) for x in busIds.split(',') if x != 'x']
-        earliestBusId = 0
+        N = reduce(lambda a,b: a*b, [int(id) for id in busIds if id != 'x'])
+        sum = 0
 
-        while True:
-            for id in busIds:
-                if timestamp % id == 0:
-                    earliestTimestamp,earliestBusId = timestamp,id
-                    break
+        for i,n in enumerate(busIds):
+            if n == 'x':
+                continue
 
-            if earliestBusId != 0:
-                break
+            n = int(n)
+            a = n - i
+            y = N // n
+            z = pow(y, n-2, n)
 
-            timestamp += 1
-                 
-        print(f'Earliest timestamp is {timestamp} with bus ID {earliestBusId} which gives {(earliestTimestamp - startTimestamp) * earliestBusId}')
+            sum += a * y * z
+            sum %= N 
+
+        print(f'The timestamp is: {sum}')
 
     except IOError:
         print(f'Unable to open file {inputPath}')
