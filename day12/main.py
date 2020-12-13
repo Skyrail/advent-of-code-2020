@@ -48,10 +48,10 @@ if os.path.isfile(inputPath):
         for line in currentBatch:
             instruction,distance = line[0], int(line[1:])
 
-            if instruction in ('N', 'E', 'S', 'W', 'L', 'R'):
-                currentWaypoint = getNewWaypoint(currentWaypoint, instruction, distance)
-            elif instruction == 'F':
+            if instruction == 'F':
                 currentCoordinate = getNewCoordinate(currentCoordinate, currentWaypoint, distance)
+            else:
+                currentWaypoint = getNewWaypoint(currentWaypoint, instruction, distance)
 
         manhattanDistance = calculateManhattanDistance(startCoordinate, currentCoordinate)
 
