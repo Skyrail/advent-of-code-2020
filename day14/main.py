@@ -1,5 +1,6 @@
 import os, sys, re
 from functools import reduce
+from itertools import product
 
 if len(sys.argv) != 2:
     raise ValueError('Please supply the input to be processed')
@@ -12,29 +13,42 @@ if os.path.isfile(inputPath):
         
         currentBatch = file.read().strip().split('\n')
 
-        mask = "X"*36
-        memory = dict()
+        mask, masks, memory = "X"*36, list(), dict()
 
         for line in currentBatch:
-            # If mask field - update mask
+
             if 'mask' in line:
-                mask = line[7:]
+                mask, masks = line[7:], list()
+
+                maskFloatingBits = list(product('01', repeat=mask.count('X')))
+
+                for combination in maskFloatingBits:
+
+                    maskCopy = mask
+                    
+                    for bit in combination:
+                        maskCopy = maskCopy.replace('X', str(bit), 1)
+
+                    masks.append(maskCopy)
+                    
             else:
                 regex = r'mem\[([\d]+)\] = ([\d]+)'
                 address,value = re.findall(regex, line)[0]
-                binary = format(int(value), '036b')
+                binary = format(int(address), '036b')
 
-                binaryList = list(binary)
+                for combination in masks:
 
-                for i,m in enumerate(mask):
-                    if m == 'X':
-                        continue
+                    memoryAddress = list(binary)
 
-                    binaryList[i] = m
+                    for i,bit in enumerate(list(combination)):
+                        if mask[i] == 'X' or mask[i] == '1':
+                            memoryAddress[i] = bit
 
-                memory[address] = int("".join(binaryList), 2)
+                    memoryAddress = "".join(memoryAddress)
+                    
+                    memory[memoryAddress] = value
 
-        memorySum = reduce(lambda x,y:x+y, memory.values())
+        memorySum = reduce(lambda x,y:int(x)+int(y), memory.values())
 
         print(f'The memory sum is: {memorySum}')
 
