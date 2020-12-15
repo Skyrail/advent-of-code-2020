@@ -11,19 +11,30 @@ if os.path.isfile(inputPath):
         
         currentBatch = list(file.read().strip().split(','))
 
-        i,numbers = len(currentBatch), [int(n) for n in currentBatch]
-        while len(numbers) < 2020:
-            previousNo = numbers[-1]
+        numbers = [int(n) for n in currentBatch]
+        spoken = dict()
 
-            if previousNo not in numbers[:-1]:
-                numbers.append(0)
+        for i,num in enumerate(numbers):
+            if i == len(numbers)-1:
+                break
             else:
-                idx = len(numbers) - 2- numbers[:-1][::-1].index(previousNo)
-                numbers.append(i - 1 - idx)
+                spoken[num] = i
 
-            i += 1
+        while len(numbers) < 2020:
 
-        print(numbers[len(numbers) - 1])
+            lastSpokenNum = numbers[-1]
+            lastSpokenIdx = len(numbers) - 1
+            prevSpokenIdx = spoken.get(lastSpokenNum, False)
+            spoken[lastSpokenNum] = lastSpokenIdx
+
+            if prevSpokenIdx is False:
+                speak = 0
+            else:
+                speak = lastSpokenIdx - prevSpokenIdx
+            
+            numbers.append(speak)
+
+        print(f'The {len(numbers)} number is {numbers[-1]}')
 
     except IOError:
         print(f'Unable to open file {inputPath}')
