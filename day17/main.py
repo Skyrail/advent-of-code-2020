@@ -24,66 +24,60 @@ if os.path.isfile(inputPath):
             for R in dimensions:
                 print("".join(R))
 
+        gridWidth = len(dimensions[0][0])
+        gridHeight = len(dimensions[0])
+
+        cMin,cMax = -gridWidth-1,gridWidth+1
+        rMin,rMax = -gridHeight-1,gridHeight+1
+        lMin,lMax = -2,2
+        tMin,tMax = -2,2
+
+        prevActive = set()
+
+        for ri,row in enumerate(dimensions[0]):
+            for ci,col in enumerate(row):
+                if col == '#':
+                    prevActive.add((0,0,ri,ci)) 
+
         while cycle < 6:
 
-            for Li,L in dimensions.items():
-                for Ri,R in enumerate(L):
-                    dimensions[Li][Ri] = ['.'] + R + ['.']
-                newRow = [['.'] * len(dimensions[0][0])]
-                dimensions[Li] = deepcopy(newRow) + dimensions[Li] + deepcopy(newRow)
+            active = set()
 
-            newLayerRow = ['.'] * len(dimensions[0][0])
-            
-            newLayer = []
-            for _ in range(len(dimensions[0])):
-                newLayer.append(deepcopy(newLayerRow))
+            for w in (range(tMin,tMax)):
+                for z in range(lMin,lMax):
+                    for y in range(rMin,rMax):
+                        for x in range(cMin,cMax):
+                            activeCount = 0
+                            for wi in searchArea:
+                                for zi in searchArea:
+                                    for yi in searchArea:
+                                        for xi in searchArea:
+                                            if zi == 0 and yi == 0 and xi == 0 and wi == 0:
+                                                continue
 
+                                            checkX = x + xi
+                                            checkY = y + yi
+                                            checkZ = z + zi
+                                            checkW = w + wi
 
-            dimensions[(max(dimensions.keys())+1)] = deepcopy(newLayer)
-            dimensions[(min(dimensions.keys())-1)] = deepcopy(newLayer)
+                                            if (checkW,checkZ,checkY,checkX) in prevActive:
+                                                activeCount += 1
+                                
+                            if (w,z,y,x) in prevActive and (2 <= activeCount <= 3):
+                                active.add((w,z,y,x))
+                            elif (w,z,y,x) not in prevActive and activeCount == 3:
+                                active.add((w,z,y,x))
 
-            prevDimensions = deepcopy(dimensions)
+            lMin,lMax = lMin-1,lMax+1
+            rMin,rMax = rMin-1,rMax+1
+            cMin,cMax = cMin-1,cMax+1
+            tMin,tMax = tMin-1,tMax+1
 
-            minZ = min(prevDimensions.keys())
-            maxZ = max(prevDimensions.keys())
-            maxY = len(prevDimensions[0])
-            maxX = len(prevDimensions[0][0])
-
-            for layer in range(minZ,maxZ+1):
-                for row in range(maxY):
-                    for col in range(maxX):
-                        element = prevDimensions[layer][row][col]
-                        activeCount = 0
-
-                        for zi in searchArea:
-                            for yi in searchArea:
-                                for xi in searchArea:
-                                    if(xi == 0 and yi == 0 and zi == 0):
-                                        continue
-
-                                    xIndex = col + xi
-                                    yIndex = row + yi
-                                    zIndex = layer + zi
-
-                                    if (0 <= xIndex < maxX) and (0 <= yIndex < maxY) and (minZ <= zIndex <= maxZ) and prevDimensions[zIndex][yIndex][xIndex] == '#':
-                                        activeCount += 1
-
-                        if element == '#' and not (2 <= activeCount <= 3):
-                            dimensions[layer][row][col] = '.'
-                        elif element == '.' and activeCount == 3:
-                            dimensions[layer][row][col] = '#'
+            prevActive = deepcopy(active)
 
             cycle += 1
 
-        totalActive = 0
-
-        for L in dimensions.values():
-            for R in L:
-                for C in R:
-                    if C == '#':
-                        totalActive += 1
-
-        print(totalActive)
+        print(len(active))
 
     except IOError:
         print(f'Unable to open file {inputPath}')
