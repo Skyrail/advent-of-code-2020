@@ -43,6 +43,7 @@ if os.path.isfile(inputPath):
 
         validTickets = list()
 
+        # Discard the invalid tickets
         for ticket in otherTickets:
             isValidTicket = True
             for value in ticket:
@@ -53,11 +54,13 @@ if os.path.isfile(inputPath):
 
         validFields = defaultdict(set)
 
+        # With the valid tickets find out which fields/validations would match with what indicies
         for field,rule in rules.items():
             for i in range(len(validTickets[0])):
                 if all(int(ticket[i]) in rules[field] for ticket in validTickets):
                     validFields[field].add(i)
 
+        # Using the fields that only have a single suitable index figure out which index belongs to which field
         while all([len(L) == 1 for L in validFields.values()]) == False:
             for field,indicies in validFields.items():
                 if len(indicies) == 1:
@@ -66,6 +69,7 @@ if os.path.isfile(inputPath):
                             continue
                         validFields[f] = i - indicies
 
+        # Calculate the result as per the task
         result = 1
 
         for field,index in validFields.items():
